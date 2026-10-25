@@ -1,2 +1,3 @@
-Flask Pet Project
+#Flask Pet Project
+
 Базовий веб-додаток на Flask із підтримкою сесій та базою даних.
