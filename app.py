@@ -1,6 +1,31 @@
-from flask import Flask, render_template
+import sqlite3
+import os
+from flask import Flask, render_template, request, redirect, url_for, g, session
 
 app = Flask(__name__)
+app.secret_key = 'super-secret-key-for-pet-project'
+app.config['DATABASE'] = 'app.db'
+
+def get_db():
+    if 'db' not in g:
+        g.db = sqlite3.connect(app.config['DATABASE'])
+        g.db.row_factory = sqlite3.Row
+    return g.db
+
+@app.teardown_appcontext
+def close_db(error):
+    db = g.pop('db', None)
+    if db is not None:
+        db.close()
+
+def init_db():
+    db = get_db()
+    with open('schema.sql', mode='r', encoding='utf-8') as f:
+        db.cursor().executescript(f.read())
+    db.commit()
+
+with app.app_context():
+    init_db()
 
 @app.route('/')
 def index():
@@ -14,5 +39,6 @@ def register():
 def login():
     return render_template('login.html')
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/debug-db')
+def debug_db():
+    return "Тестове з'єднання успішне!"
